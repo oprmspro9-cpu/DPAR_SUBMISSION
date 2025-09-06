@@ -1,21 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>D-PAR Submission Form</title>
+  <meta charset="utf-8">
+  <title>DPAR Submission Form</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2980b9">
   <style>
     body {
       font-family: "Segoe UI", Arial, sans-serif;
       padding: 20px;
-      background: #f4f7fb;
-      color: #1b2a4e;
+      background: #f5f6fa;
+      color: #2c3e50;
     }
     h2 {
       text-align: center;
-      color: #0d47a1;
+      color: #2c3e50;
       text-transform: uppercase;
-      letter-spacing: 1.5px;
+      letter-spacing: 1.2px;
       margin-bottom: 20px;
     }
     form {
@@ -23,58 +25,124 @@
       margin: auto;
       background: #ffffff;
       padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-      border-top: 6px solid #0d47a1;
+      border-radius: 10px;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+      border: 1px solid #e0e0e0;
     }
     label {
       display: block;
       margin-top: 15px;
-      font-weight: bold;
+      font-weight: 600;
       font-size: 13px;
-      color: #0d47a1;
+      color: #34495e;
       text-transform: uppercase;
     }
     input, select {
       width: 100%;
       padding: 12px;
       margin-top: 6px;
-      border: 1px solid #90a4ae;
-      border-radius: 8px;
-      background: #f9fbfd;
+      border: 1px solid #dcdde1;
+      border-radius: 6px;
+      background: #fafafa;
       font-size: 15px;
-      color: #1b2a4e;
+      color: #2c3e50;
       transition: 0.2s;
     }
     input:focus, select:focus {
-      border-color: #0d47a1;
-      box-shadow: 0 0 6px rgba(13,71,161,0.3);
+      border-color: #2980b9;
+      box-shadow: 0 0 6px rgba(41,128,185,0.3);
       outline: none;
+      background: #fff;
     }
     button {
       margin-top: 25px;
       width: 100%;
       padding: 14px;
-      background: #0d47a1;
+      background: #2980b9;
       color: #fff;
       border: none;
-      border-radius: 8px;
+      border-radius: 6px;
       font-size: 16px;
-      font-weight: bold;
+      font-weight: 600;
       text-transform: uppercase;
       cursor: pointer;
-      letter-spacing: 1px;
+      letter-spacing: 0.5px;
       transition: 0.3s;
     }
-    button:hover { background: #1565c0; }
-    button:disabled { background: #90a4ae; cursor: not-allowed; }
+    button:hover { background: #1f6391; }
+    button:disabled { background: #bdc3c7; cursor: not-allowed; }
   </style>
 </head>
 <body>
-  <h2>D-PAR Submission Form</h2>
+  <h2>DPAR Submission Form</h2>
   <form id="dparForm">
-    <label for="rank">Rank</label>
-    <input type="text" id="rank" name="rank" required>
+    <label>Unit</label>
+    <select name="unit" required>
+      <option value="" disabled selected>Select Unit</option>
+      <option value="ICPS">ICPS</option>
+      <option value="ZCPO">ZCPO</option>
+      <option value="ZSBPPO">ZSBPPO</option>
+      <option value="ZSPPO">ZSPPO</option>
+      <option value="ZNPPO">ZNPPO</option>
+      <option value="RMFB">RMFB</option>
+      <option value="RHQ">RHQ</option>
+    </select>
 
-    <label for="name">Name</label>
-    <input ty
+    <label>Station</label>
+    <input type="text" name="stationOffice" placeholder="Station/Office" required>
+
+    <label>Total Strength</label>
+    <input type="number" name="totalStrength" placeholder="Number" required>
+
+    <label>Actual Present</label>
+    <input type="number" name="actualPresent" placeholder="Number" required>
+
+    <label>Authorized Absent</label>
+    <input type="number" name="authorizeAbsent" placeholder="Number" required>
+
+    <label>Absent</label>
+    <input type="number" name="absent" placeholder="Number" required>
+
+    <label>Station Commander</label>
+    <input type="text" name="stationCommander" placeholder="RANK NAME" required>
+
+    <label>Action Personnel</label>
+    <input type="text" name="actionPersonnel" placeholder="Rank Name" required>
+
+    <label>Contact Info</label>
+    <input type="tel" name="contact" placeholder="09XXXXXXXXX" required>
+
+    <label>Attachment (PDF)</label>
+    <input type="file" name="attachment" accept="application/pdf" required>
+
+    <button type="submit">Submit Report</button>
+  </form>
+
+  <script>
+    const scriptURL = "YOUR_WEB_APP_URL_HERE"; // replace with Apps Script WebApp URL
+    const form = document.getElementById("dparForm");
+
+    form.addEventListener("submit", e => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      fetch(scriptURL, { method: "POST", body: formData })
+        .then(res => res.json())
+        .then(data => {
+          if (data.status === "success") {
+            alert("✅ DPAR submitted successfully!");
+            form.reset();
+          } else {
+            alert("⚠️ Error: " + data.message);
+          }
+        })
+        .catch(err => alert("❌ Submission failed: " + err));
+    });
+
+    // Register service worker
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("service-worker.js");
+    }
+  </script>
+</body>
+</html>
+
