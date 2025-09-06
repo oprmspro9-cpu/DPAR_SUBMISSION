@@ -4,81 +4,89 @@
   <meta charset="utf-8">
   <title>DPAR Submission Form</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#2980b9">
   <style>
     body {
       font-family: "Segoe UI", Arial, sans-serif;
-      padding: 20px;
+      padding: 15px;
+      margin: 0;
       background: #f5f6fa;
       color: #2c3e50;
     }
     h2 {
       text-align: center;
-      color: #2c3e50;
+      color: #2980b9;
       text-transform: uppercase;
-      letter-spacing: 1.2px;
       margin-bottom: 20px;
+      font-size: 20px;
     }
     form {
-      max-width: 700px;
+      max-width: 600px;
       margin: auto;
-      background: #ffffff;
-      padding: 25px;
-      border-radius: 10px;
-      box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
       border: 1px solid #e0e0e0;
     }
     label {
       display: block;
-      margin-top: 15px;
+      margin-top: 12px;
       font-weight: 600;
       font-size: 13px;
       color: #34495e;
-      text-transform: uppercase;
     }
     input, select {
       width: 100%;
       padding: 12px;
       margin-top: 6px;
       border: 1px solid #dcdde1;
-      border-radius: 6px;
-      background: #fafafa;
+      border-radius: 8px;
       font-size: 15px;
-      color: #2c3e50;
-      transition: 0.2s;
-    }
-    input:focus, select:focus {
-      border-color: #2980b9;
-      box-shadow: 0 0 6px rgba(41,128,185,0.3);
-      outline: none;
-      background: #fff;
+      background: #fafafa;
+      box-sizing: border-box;
     }
     button {
-      margin-top: 25px;
+      margin-top: 20px;
       width: 100%;
       padding: 14px;
       background: #2980b9;
       color: #fff;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       font-size: 16px;
       font-weight: 600;
-      text-transform: uppercase;
       cursor: pointer;
-      letter-spacing: 0.5px;
-      transition: 0.3s;
     }
-    button:hover { background: #1f6391; }
-    button:disabled { background: #bdc3c7; cursor: not-allowed; }
+    button:disabled {
+      background: #7f8c8d;
+      cursor: not-allowed;
+    }
+    #responseMessage {
+      margin-top: 20px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 14px;
+    }
+    .spinner {
+      display: none;
+      margin: 10px auto;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #2980b9;
+      border-radius: 50%;
+      width: 26px;
+      height: 26px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body>
   <h2>DPAR Submission Form</h2>
 
-  <!-- IMPORTANT: Replace ACTION URL with your Apps Script Web App URL -->
-  <form action="https://script.google.com/macros/s/AKfycbxpiUHO6mgRtyWiuXa7nddtSHs3B9HeRykRjI7UUO2x/dev" method="post" enctype="multipart/form-data" target="_blank">
-    
+  <form id="dparForm">
     <label>Unit</label>
     <select name="unit" required>
       <option value="" disabled selected>Select Unit</option>
@@ -92,33 +100,75 @@
     </select>
 
     <label>Station</label>
-    <input type="text" name="stationOffice" placeholder="Station/Office" required>
+    <input type="text" name="stationOffice" required>
 
     <label>Total Strength</label>
-    <input type="number" name="totalStrength" placeholder="Number" required>
+    <input type="number" name="totalStrength" required>
 
     <label>Actual Present</label>
-    <input type="number" name="actualPresent" placeholder="Number" required>
+    <input type="number" name="actualPresent" required>
 
     <label>Authorized Absent</label>
-    <input type="number" name="authorizeAbsent" placeholder="Number" required>
+    <input type="number" name="authorizeAbsent" required>
 
     <label>Absent</label>
-    <input type="number" name="absent" placeholder="Number" required>
+    <input type="number" name="absent" required>
 
     <label>Station Commander</label>
-    <input type="text" name="stationCommander" placeholder="RANK NAME" required>
+    <input type="text" name="stationCommander" required>
 
     <label>Action Personnel</label>
-    <input type="text" name="actionPersonnel" placeholder="Rank Name" required>
+    <input type="text" name="actionPersonnel" required>
 
     <label>Contact Info</label>
-    <input type="tel" name="contact" placeholder="09XXXXXXXXX" required>
+    <input type="tel" name="contact" required>
 
     <label>Attachment (PDF)</label>
     <input type="file" name="attachment" accept="application/pdf" required>
 
     <button type="submit">Submit Report</button>
+    <div class="spinner" id="spinner"></div>
   </form>
+
+  <div id="responseMessage"></div>
+
+  <script>
+    const scriptURL = "YOUR_WEB_APP_URL"; // Replace with your Google Apps Script Web App URL
+    const form = document.getElementById("dparForm");
+    const responseMessage = document.getElementById("responseMessage");
+    const spinner = document.getElementById("spinner");
+    const submitBtn = form.querySelector("button");
+
+    form.addEventListener("submit", e => {
+      e.preventDefault();
+      const formData = new FormData(form);
+
+      // Show loading state
+      spinner.style.display = "block";
+      submitBtn.disabled = true;
+      responseMessage.innerHTML = "Submitting...";
+
+      fetch(scriptURL, { method: "POST", body: formData })
+        .then(res => res.json())
+        .then(data => {
+          spinner.style.display = "none";
+          submitBtn.disabled = false;
+
+          if (data.status === "success") {
+            responseMessage.innerHTML =
+              `<span style="color:green">✅ Submitted successfully!</span>
+               ${data.fileUrl ? `<br><a href="${data.fileUrl}" target="_blank">View Attachment</a>` : ""}`;
+            form.reset();
+          } else {
+            responseMessage.innerHTML = `<span style="color:red">⚠️ Error: ${data.message}</span>`;
+          }
+        })
+        .catch(err => {
+          spinner.style.display = "none";
+          submitBtn.disabled = false;
+          responseMessage.innerHTML = `<span style="color:red">❌ Submission failed: ${err}</span>`;
+        });
+    });
+  </script>
 </body>
 </html>
